@@ -9,7 +9,7 @@ Router.post("/signup", async (req, res) => {
     email: req.body.email,
     password: req.body.password,
     emailVerified: false,
-    displayName: "John Doe",
+    displayName: req.body.displayName,
     photoURL: "http://www.example.com/12345678/photo.png",
     disabled: false,
   };
@@ -18,11 +18,19 @@ Router.post("/signup", async (req, res) => {
     .createUser(user)
     .then((userRecord) => {
       // User created successfully
-      res
-        .status(200)
-        .json({ message: "User created successfully", uid: userRecord.uid });
+      res.status(200).json({
+        message: "User created successfully",
+        user: {
+          uid: userRecord.uid,
+          email: userRecord.email,
+          emailVerified: userRecord.emailVerified,
+          displayName: userRecord.displayName,
+          photoURL: userRecord.photoURL,
+          disabled: userRecord.disabled,
+        },
+      });
     })
-    .catch((error) => {
+    .catch((error: Error) => {
       res
         .status(500)
         .json({ message: "Error creating new user", error: error });
@@ -39,10 +47,18 @@ Router.get("/users/:uid", async (req, res) => {
       // User found
       res.status(200).json({
         message: "Successfully fetched user data:",
-        user: userRecord.toJSON(),
+        // user: userRecord.toJSON(),
+        user: {
+          uid: userRecord.uid,
+          email: userRecord.email,
+          emailVerified: userRecord.emailVerified,
+          displayName: userRecord.displayName,
+          photoURL: userRecord.photoURL,
+          disabled: userRecord.disabled,
+        },
       });
     })
-    .catch((error) => {
+    .catch((error: Error) => {
       console.log("Error fetching user data:", error);
     });
 });

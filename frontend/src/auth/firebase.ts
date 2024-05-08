@@ -1,5 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage"; // Import Firebase Storage
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_KEY,
@@ -25,13 +27,16 @@ const loginWithEmailAndPassword = async (email: string, password: string) => {
     );
     const user = userCredential.user;
     const tokenId = await user.getIdToken();
-    return tokenId; // Return the token
+    return { tokenId, uid: user.uid }; // Return the token and the uid
   } catch (error) {
     console.error((error as Error).message);
-    return ""; // Return an empty string if there's an error
+    return { tokenId: "", uid: "" }; // Return an object with empty string values if there's an error
   }
 };
 
 const logout = () => auth.signOut();
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(); // Initialize Firebase Storage
 
-export { auth, loginWithEmailAndPassword, logout };
+export { auth, loginWithEmailAndPassword, logout, db, storage, getAuth };

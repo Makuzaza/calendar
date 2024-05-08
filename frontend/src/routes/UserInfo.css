@@ -1,0 +1,103 @@
+.user-info {
+  background-color: #ffffff;
+  color: #333;
+  margin: 20px;
+  padding: 20px;
+  border-radius: 5px;
+  display: flex;
+  min-height: 70vh;
+  height: fit-content;
+}
+
+.user-info .info-box {
+  margin: 5px;
+  padding: 10px;
+  border-radius: 14px;
+  background-color: #eaeaea;
+  min-height: 450px;
+  height: fit-content;
+}
+.user-info .info-box .profile-pic img,
+.user-info .info-box .profile-pic {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto;
+  border-radius: 100px;
+  position: relative;
+}
+
+#editor {
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  bottom: 5px;
+  right: -10px;
+}
+#editor:hover {
+  cursor: pointer;
+}
+.remove-and-upload {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+.personal-info {
+  display: flex;
+  margin: 40px 0 0 0;
+}
+.user-info .info-box h2 {
+  text-align: center;
+}
+.user-info .info-box .button {
+  margin: 10px 0;
+}
+
+.user-info .files-boxes {
+  margin: 5px;
+  padding: 10px;
+  border-radius: 14px;
+  background-color: #eaeaea;
+  min-height: 450px;
+  height: fit-content;
+}
+
+.user-info .files-box {
+  padding: 0 10px 10px;
+  border-radius: 2px;
+}
+
+.user-info .danger-zone {
+  margin: 5px;
+  padding: 10px;
+  background-color: #eaeaea;
+  border-radius: 14px;
+  color: #d00000;
+}
+
+.user-info .left-col {
+  padding-right: 100px;
+}
+
+.user-info .right-col {
+  width: 150px;
+}
+
+.user-info .right-col .no-username {
+  font-style: italic;
+  font-size: 14px;
+}
+
+.user-info .flex {
+  display: flex;
+}
+
+.user-info .delete {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #d00000;
+  cursor: pointer;
+  margin-top: 10px;
+  width: 18px;
+  height: 18px;
+}

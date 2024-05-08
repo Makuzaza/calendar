@@ -1,21 +1,26 @@
+#preview-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 50px 0;
+}
+
 .panel .preview {
-  margin: 20px;
+  margin: 20px 20px 10px 20px;
   border-radius: 2px;
-  padding: 50px;
   width: 100%;
   background-color: transparent;
   position: relative;
   min-width: 500px;
 }
 
-.preview .container {
-  margin: 0 auto;
-  width: 90%;
-}
-
 .preview .windows {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .preview .title {
@@ -34,9 +39,6 @@
   background-color: #f8f9fa;
   color: #495057;
   transition: all 0.15s;
-  position: absolute;
-  top: 5px;
-  right: 5px;
 }
 
 .preview .modal-create,
@@ -46,4 +48,18 @@
   right: 0;
   z-index: 1000;
   width: 100%;
+}
+
+.preview-final {
+  text-align: center;
+}
+.preview-buttons button {
+  margin-top: 10px;
+  background-color: #0e627a;
+  border: none;
+  outline: none;
+  float: right;
+}
+.preview-buttons button:hover {
+  background-color: #0b5063;
 }
