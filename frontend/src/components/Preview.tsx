@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router";
 import Swal from "sweetalert2";
 
 import axios from "axios";
@@ -44,11 +44,17 @@ type Props = {
   uploadedImageName: string;
   windowContent: WindowContent[];
   setWindowContent: (windowContent: WindowContent[]) => void;
+  setWindows: (windows: string[]) => void;
+  setMusicFile: (musicFile: string) => void;
+  setMusicFX: (musicFX: string) => void;
+  setSelectedBackground: (selectedBackground: string) => void;
+  imageURL: string;
 };
 
 interface Json {
-  ownerUid: string;
+  uid: string;
   windows: string[];
+  isPrivate: boolean;
   text: {
     title: string;
     titleFont: string;
@@ -67,7 +73,8 @@ interface Json {
     imageURL: string;
     uploadedImageName: string;
   };
-  windowContent: WindowContent[];
+  windowsContent: WindowContent[];
+  ownerUid: string;
 }
 
 const Preview: React.FC<Props> = ({
@@ -76,28 +83,127 @@ const Preview: React.FC<Props> = ({
   setTitle,
   setSubtitle,
   titleFont,
+  setTitleFont,
   titleFontSize,
+  setTitleFontSize,
   subtitleFont,
+  setSubtitleFont,
   subTitleFontSize,
-  setDay,
+  setSubTitleFontSize,
   day,
+  setDay,
   windows,
+  setWindows,
   titleColor,
+  setTitleColor,
   subtitleColor,
+  setSubtitleColor,
   musicFile,
+  setMusicFile,
   musicFX,
+  setMusicFX,
   selectedBackground,
   uploadedImageName,
   windowContent,
   setWindowContent,
+  setSelectedBackground,
+  imageURL,
+  
 }) => {
   const [openPreviewModal, setOpenPreviewModal] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [isPrivate, setIsPrivate] = useState<boolean>(false);
+  const [calendarData, setCalendarData] = useState<Json | null>(null);
+  const [calendarId, setCalendarId] = useState("");
+  const [ownerUid, setOwnerUid] = useState<string>("");
 
   const token = useAppSelector((state) => state.token.token);
   const uid = useAppSelector((state) => state.uid.uid);
+  // const ownerUid = useAppSelector((state) => state.ownerUid.ownerUid);
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state && location.state.calendarId) {
+      setCalendarId(location.state.calendarId);
+      fetchCalendarData(location.state.calendarId); // Fetch data from Firebase with the passed calendarId
+    }
+  }, [location]);
+
+  const fetchCalendarData = async (calendarId: string) => {
+    try {
+      const response = await fetch(`https://caas-deploy.onrender.com/firestore/calendars/${calendarId}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch calendar data");
+      }
+      const data: Json = await response.json();
+      setCalendarData(data);
+      setOwnerUid(data.ownerUid);
+      console.log("Calendar data:", data);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (calendarData) {
+      setTitle(calendarData.text?.title || title);
+      setSubtitle(calendarData.text?.subtitle || subtitle);
+      setTitleFont(calendarData.text?.titleFont || titleFont);
+      setSubtitleFont(calendarData.text?.subtitleFont || subtitleFont);
+      setTitleFontSize(calendarData.text?.titleFontSize || titleFontSize);
+      setSubTitleFontSize(calendarData.text?.subTitleFontSize || subTitleFontSize);
+      setTitleColor(calendarData.text?.titleColor || titleColor);
+      setSubtitleColor(calendarData.text?.subtitleColor || subtitleColor);
+      setSelectedBackground(calendarData.image?.imageURL || selectedBackground);
+      setMusicFile(calendarData.sounds?.musicName || musicFile);
+      setMusicFX(calendarData.sounds?.soundFxName || musicFX);
+      setWindows(calendarData.windows || windows);
+  
+      // Set windowContent here
+      if (calendarData.windowsContent) {
+        // Use `windowsContent` if available, otherwise use `windowContent`
+        const content = calendarData.windowsContent || calendarData.windowsContent;
+        const newWindowContent = content.map((window: WindowContent) => ({
+          text: window.text || "",
+          videoURL: window.videoURL || "",
+          uploadedImageName: window.uploadedImageName || "",
+          imageURLModal: window.uploadedImageName ? `https://caas-deploy.onrender.com/storage/images/${window.uploadedImageName}` : ""
+        }));
+        setWindowContent(newWindowContent);
+      } else {
+        const newWindowContent = windows.map(() => ({
+          text: "",
+          videoURL: "",
+          uploadedImageName: "",
+          imageURLModal: ""
+        }));
+        setWindowContent(newWindowContent);
+      }
+    } 
+  }, [
+    calendarData,
+    title,
+    subtitle,
+    titleFont,
+    subtitleFont,
+    titleFontSize,
+    subTitleFontSize,
+    titleColor,
+    subtitleColor,
+    selectedBackground,
+    musicFile,
+    musicFX,
+    windows,
+  ]);
+  
+  // console.log(calendarData);
+  // console.log(calendarId);
+  // console.log(location.state);
+  // console.log(imageURL);
+  // console.log(windowContent)
+  // console.log(ownerUid)
 
   const onTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(event.target.value);
@@ -110,7 +216,9 @@ const Preview: React.FC<Props> = ({
   const saveCalendar = async () => {
     const json: Json = {
       windows: windows,
+      uid: uid,
       ownerUid: uid,
+      isPrivate: isPrivate,
       text: {
         title: title,
         titleFont: titleFont,
@@ -138,10 +246,11 @@ const Preview: React.FC<Props> = ({
     console.log(json);
 
     axios
-      .post(`http://localhost:8000/firestore/calendars`, {
+      .post(`https://caas-deploy.onrender.com/firestore/calendars`, {
         token: token,
         uid: uid,
         data: json,
+        ownerUid: uid,
       })
       .then((response) => {
         navigate(`/calendars/${response.data.calendarId}`);
@@ -150,7 +259,7 @@ const Preview: React.FC<Props> = ({
           icon: "success",
           title: "Your calendar has been saved",
           showConfirmButton: false,
-          timer: 1500
+          timer: 1500,
         });
       })
       .catch((error) => {
@@ -159,7 +268,8 @@ const Preview: React.FC<Props> = ({
   };
 
   return (
-    <div id="preview-container">
+    <div id="preview-container" style={{ backgroundImage: `url(${selectedBackground})`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover', minHeight: '100vh', backgroundPosition: 'center'
+    }}>
       <div className="preview">
         <div className="preview-music">
           {musicFile && (
@@ -172,7 +282,7 @@ const Preview: React.FC<Props> = ({
         <div className="preview-soundfx">
           {musicFX && (
             <>
-              <p className="preview-sound-btn">FX: </p>
+              <p className="preview-sound-btn">Sound effect: </p>
               <MusicPlayer audioSrc={musicFX} type={"soundFx"} />
             </>
           )}
@@ -214,6 +324,8 @@ const Preview: React.FC<Props> = ({
               setOpenPreviewModal={setOpenPreviewModal}
               musicFX={musicFX}
               windowContent={windowContent}
+              uploadedImageName={uploadedImageName}
+              ownerUid={ownerUid}
             />
           ))}
         </div>
@@ -227,6 +339,8 @@ const Preview: React.FC<Props> = ({
               amountOfWindows={windows.length}
               windowContent={windowContent}
               setWindowContent={setWindowContent}
+              uploadedImageName={uploadedImageName}
+              ownerUid={ownerUid}
             />
           </div>
         )}
@@ -237,10 +351,23 @@ const Preview: React.FC<Props> = ({
               openPreviewModal={openPreviewModal}
               setOpenPreviewModal={setOpenPreviewModal}
               windowContent={windowContent}
-              setWindowContent={setWindowContent}
+              // setWindowContent={setWindowContent}
+              ownerUid = {ownerUid}
             />
           </div>
         )}
+      </div>
+      <div className="private">
+        <label>
+          Make it private:
+          <input style={{marginLeft: '10px', cursor: 'pointer'}}
+            type="checkbox"
+            name="privateCheckbox"
+            onClick={() => {
+              setIsPrivate(!isPrivate);
+            }}
+          />
+        </label>
       </div>
       <div className="preview-buttons">
         <Button variant="contained" color="primary" onClick={saveCalendar}>

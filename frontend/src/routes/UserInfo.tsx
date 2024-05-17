@@ -18,6 +18,7 @@ import { ChangeUsername } from "../components/ChangeUsername";
 import { ChangePassword } from "../components/ChangePassword";
 import profilepic from "../assets/user_149071.png";
 import editor from "../assets/camera.png";
+import Swal from "sweetalert2";
 
 interface CalendarData {
   text: {
@@ -67,12 +68,12 @@ const UserInfo: React.FC = () => {
   // Function to upload profile picture to Firebase Storage
   const uploadProfilePicture = async () => {
     const user = getAuth().currentUser;
-
+  
     if (!selectedFile || !uid) return;
-
+  
     const storage = getStorage();
     const fileRef = ref(storage, `profile_pictures/${uid}`);
-
+  
     if (user) {
       try {
         const snapshot = await uploadBytes(fileRef, selectedFile);
@@ -81,6 +82,15 @@ const UserInfo: React.FC = () => {
         await updateProfile(user, { photoURL: downloadURL });
         setProfilePic(downloadURL);
         console.log("Profile picture uploaded successfully");
+  
+        // Display success popup
+        Swal.fire({
+          position: "center",
+          icon: "success",
+          title: "Profile picture uploaded successfully",
+          showConfirmButton: false,
+          timer: 1500,
+        });
       } catch (error) {
         console.error("Error uploading profile picture:", error);
       }
@@ -129,7 +139,7 @@ const UserInfo: React.FC = () => {
     if (!uid) return;
     console.log(`user: ${uid} calendars`);
     axios
-      .get("http://localhost:8000/firestore/calendars/user", {
+      .get("https://caas-deploy.onrender.com/firestore/calendars/user", {
         params: {
           // token: token,
           uid: uid,
@@ -144,12 +154,15 @@ const UserInfo: React.FC = () => {
   // Delete calendar by calendarId
   const deleteCalendar = (calendarId: string) => {
     axios
-      .delete(`http://localhost:8000/firestore/calendars/${calendarId}`, {
-        params: {
-          token: token,
-          uid: uid,
-        },
-      })
+      .delete(
+        `https://caas-deploy.onrender.com/firestore/calendars/${calendarId}`,
+        {
+          params: {
+            token: token,
+            uid: uid,
+          },
+        }
+      )
       .then((response) => {
         getUserCalendars();
         console.log(response);
@@ -163,7 +176,7 @@ const UserInfo: React.FC = () => {
   const getAllFilesByUid = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8000/storage/files/${uid}`
+        `https://caas-deploy.onrender.com/storage/files/${uid}`
       );
       console.log(response.data);
       setAllUserFiles(response.data);
@@ -188,14 +201,17 @@ const UserInfo: React.FC = () => {
   // Delete image file from storage
   const deleteImageFile = async (fileName: string) => {
     try {
-      await axios.delete(`http://localhost:8000/storage/images/${fileName}`, {
-        headers: {
-          "x-access-token": token,
-        },
-        data: {
-          uid: uid,
-        },
-      });
+      await axios.delete(
+        `https://caas-deploy.onrender.com/storage/images/${fileName}`,
+        {
+          headers: {
+            "x-access-token": token,
+          },
+          data: {
+            uid: uid,
+          },
+        }
+      );
       console.log("Image file deleted:", fileName);
     } catch (error) {
       console.error("Error deleting image file:", error);
@@ -206,7 +222,7 @@ const UserInfo: React.FC = () => {
   const deleteMusicFile = async (fileName: string) => {
     try {
       await axios.delete(
-        `http://localhost:8000/storage/sounds/music/${fileName}`,
+        `https://caas-deploy.onrender.com/storage/sounds/music/${fileName}`,
         {
           headers: {
             "x-access-token": token,
@@ -226,7 +242,7 @@ const UserInfo: React.FC = () => {
   const deleteSoundFxFile = async (fileName: string) => {
     try {
       await axios.delete(
-        `http://localhost:8000/storage/sounds/soundFx/${fileName}`,
+        `https://caas-deploy.onrender.com/storage/sounds/soundFx/${fileName}`,
         {
           headers: {
             "x-access-token": token,
@@ -301,7 +317,7 @@ const UserInfo: React.FC = () => {
         <div className="info-box">
           <h2>My Profile</h2>
           <div className="profile-pic">
-            <img src={profilePic || profilepic} alt="Profile picture" />
+            <img src={profilepic || profilepic} alt="Profile picture" />
             <div>
               <label htmlFor="file-input">
                 <img src={editor} alt="Edit profile picture" id="editor" />

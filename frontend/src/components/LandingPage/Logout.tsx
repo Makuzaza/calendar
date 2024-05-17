@@ -1,4 +1,3 @@
-import { Button } from "@mui/material";
 import { useNavigate } from "react-router";
 import { logout } from "../../auth/firebase";
 import { useAppDispatch } from "../../hooks/useAppDispatch";
@@ -17,9 +16,11 @@ const Logout: React.FC = () => {
   };
 
   return (
-    <Button onClick={handleLogout} color="inherit">
-      Logout
-    </Button>
+    <div>
+      <div onClick={handleLogout} color="inherit">
+        Logout
+      </div>
+    </div>
   );
 };
 
